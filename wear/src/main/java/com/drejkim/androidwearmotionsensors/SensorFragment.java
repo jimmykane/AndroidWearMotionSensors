@@ -8,7 +8,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.FloatMath;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,11 +85,18 @@ public class SensorFragment extends Fragment implements SensorEventListener {
             return;
         }
 
-        mTextValues.setText(
-                "x = " + Float.toString(event.values[0]) + "\n" +
-                "y = " + Float.toString(event.values[1]) + "\n" +
-                "z = " + Float.toString(event.values[2]) + "\n"
-        );
+        if(event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+            mTextValues.setText(
+                "hPa = " + Float.toString(event.values[0]) + "\n" +
+                "Altitude (m) = " + SensorManager.getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, event.values[0]) + "\n"
+            );
+        }else{
+            mTextValues.setText(
+                    "x = " + Float.toString(event.values[0]) + "\n" +
+                    "y = " + Float.toString(event.values[1]) + "\n" +
+                    "z = " + Float.toString(event.values[2]) + "\n"
+            );
+        }
 
         if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             detectShake(event);
@@ -120,7 +126,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
             float gZ = event.values[2] / SensorManager.GRAVITY_EARTH;
 
             // gForce will be close to 1 when there is no movement
-            float gForce = FloatMath.sqrt(gX*gX + gY*gY + gZ*gZ);
+            float gForce = (float)Math.sqrt(gX*gX + gY*gY + gZ*gZ);
 
             // Change background color if gForce exceeds threshold;
             // otherwise, reset the color
